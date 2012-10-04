@@ -3,5 +3,5 @@
 # hub(1)
 # alias git=hub
 
-require 'hub'
+require '/home/shutin/www/hub/lib/hub'
 Hub::Runner.execute(*ARGV)
