@@ -149,12 +149,53 @@ module Hub
         }
       end
 
-      pull = create_pullrequest(options)
+      api = Github.new(oauth_token: github_token)
+      response = api.pull_requests.create(options[:project].owner, options[:project].name, options)
+      args.executable = "echo"
+      args.replace [response[:html_url]]
+    rescue Github::Error::GithubError => e
+      puts "Error: #{e.message}"
+      exit 1
+    end
 
-      args.executable = 'echo'
-      args.replace [pull['html_url']]
-    rescue HTTPExceptions
-      display_http_exception("creating pull request", $!.response)
+    # hub merge -i 123
+    # hub merge -i 123 -b username:reponame
+    # hub merge https://github.com/rtomayko/tilt/issues/92
+    def merge(args)
+      args.shift
+      options = { }
+      force = explicit_owner = false
+      base_project = local_repo.main_project
+
+      while arg = args.shift
+        case arg
+          when '-f'
+            force = true
+          when '-b'
+            options[:user], options[:repo] = args.shift.split(':',2)
+          when '-i'
+            options[:issue] = args.shift
+          else
+            if url = resolve_github_url(arg) and url.project_path =~ /^pull\/(\d+)/
+              options[:issue] = $1
+              base_project = url.project
+            elsif !options[:commit_message] then options[:commit_message] = arg
+            else
+              abort "invalid argument: #{arg}"
+            end
+        end
+      end
+
+      options[:user] ||= base_project.owner
+      options[:repo] ||= base_project.name
+
+      api = Github.new(oauth_token: github_token)
+      response = api.pull_requests.merge(options[:user], options[:repo], options[:issue],
+                                         commit_message: options[:commit_message])
+      args.executable = "echo"
+      args.replace ['Merged!']
+    rescue Github::Error::GithubError => e
+      puts "Error: #{e.message}"
       exit 1
     end
 
