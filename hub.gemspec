@@ -5,15 +5,17 @@ Gem::Specification.new do |s|
   s.name              = "hub"
   s.version           = Hub::VERSION
   s.summary           = "Command-line wrapper for git and GitHub"
-  s.homepage          = "https://github.com/defunkt/hub"
-  s.email             = "chris@ozmm.org"
-  s.authors           = [ "Chris Wanstrath", "Mislav Marohnić" ]
+  s.homepage          = "https://github.com/pluff/hub"
+  s.email             = "publicshady@gmail.com"
+  s.authors           = [ "Chris Wanstrath", "Mislav Marohnić", "Pavel Shutin"]
 
   s.files             = %w( README.md Rakefile LICENSE )
   s.files            += Dir.glob("lib/**/*")
   s.files            += Dir.glob("bin/**/*")
   s.files            += Dir.glob("man/**/*")
   s.files            += Dir.glob("test/**/*")
+
+  s.add_development_dependency "pry"
 
   s.executables       = %w( hub )
   s.description       = <<desc
