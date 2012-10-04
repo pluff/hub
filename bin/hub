@@ -3,5 +3,6 @@
 # hub(1)
 # alias git=hub
 
-require 'hub'
+require File.expand_path(File.dirname(__FILE__)+'/../lib/hub')
+require 'github_api'
 Hub::Runner.execute(*ARGV)

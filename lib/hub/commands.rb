@@ -149,12 +149,12 @@ module Hub
         }
       end
 
-      pull = create_pullrequest(options)
-
-      args.executable = 'echo'
-      args.replace [pull['html_url']]
-    rescue HTTPExceptions
-      display_http_exception("creating pull request", $!.response)
+      api = Github.new(oauth_token: github_token)
+      response = api.pull_requests.create(options[:project].owner, options[:project].name, options)
+      args.executable = "echo"
+      args.replace [response[:html_url]]
+    rescue Github::Error::GithubError => e
+      puts "Error: #{e.message}"
       exit 1
     end
 
@@ -189,14 +189,13 @@ module Hub
       options[:user] ||= base_project.owner
       options[:repo] ||= base_project.name
 
-      require 'github_api'
       api = Github.new(oauth_token: github_token)
       response = api.pull_requests.merge(options[:user], options[:repo], options[:issue],
                                          commit_message: options[:commit_message])
       args.executable = "echo"
       args.replace ['Merged!']
     rescue Github::Error::GithubError => e
-      puts "Error: #{e.class.name}"
+      puts "Error: #{e.message}"
       exit 1
     end
 

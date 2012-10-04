@@ -1,6 +1,6 @@
-require 'hub/version'
-require 'hub/args'
-require 'hub/context'
-require 'hub/json'
-require 'hub/commands'
-require 'hub/runner'
+require File.expand_path(File.dirname(__FILE__)+'/hub/version')
+require File.expand_path(File.dirname(__FILE__)+'/hub/args')
+require File.expand_path(File.dirname(__FILE__)+'/hub/context')
+require File.expand_path(File.dirname(__FILE__)+'/hub/json')
+require File.expand_path(File.dirname(__FILE__)+'/hub/commands')
+require File.expand_path(File.dirname(__FILE__)+'/hub/runner')
