@@ -15,6 +15,8 @@ Gem::Specification.new do |s|
   s.files            += Dir.glob("man/**/*")
   s.files            += Dir.glob("test/**/*")
 
+  s.add_dependency "github_api"
+
   s.executables       = %w( hub )
   s.description       = <<desc
   `hub` is a command line utility which adds GitHub knowledge to `git`.
