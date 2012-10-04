@@ -158,6 +158,48 @@ module Hub
       exit 1
     end
 
+    # hub merge -i 123
+    # hub merge -i 123 -b username:reponame
+    # hub merge https://github.com/rtomayko/tilt/issues/92
+    def merge(args)
+      args.shift
+      options = { }
+      force = explicit_owner = false
+      base_project = local_repo.main_project
+
+      while arg = args.shift
+        case arg
+          when '-f'
+            force = true
+          when '-b'
+            options[:user], options[:repo] = args.shift.split(':',2)
+          when '-i'
+            options[:issue] = args.shift
+          else
+            if url = resolve_github_url(arg) and url.project_path =~ /^pull\/(\d+)/
+              options[:issue] = $1
+              base_project = url.project
+            elsif !options[:commit_message] then options[:commit_message] = arg
+            else
+              abort "invalid argument: #{arg}"
+            end
+        end
+      end
+
+      options[:user] ||= base_project.owner
+      options[:repo] ||= base_project.name
+
+      require 'github_api'
+      api = Github.new(oauth_token: github_token)
+      response = api.pull_requests.merge(options[:user], options[:repo], options[:issue],
+                                         commit_message: options[:commit_message])
+      args.executable = "echo"
+      args.replace ['Merged!']
+    rescue Github::Error::GithubError => e
+      puts "Error: #{e.class.name}"
+      exit 1
+    end
+
     # $ hub clone rtomayko/tilt
     # > git clone git://github.com/rtomayko/tilt.
     #
@@ -924,7 +966,7 @@ help
       title.tr!("\n", ' ')
       title.strip!
       body.strip!
-      
+
       [title =~ /\S/ ? title : nil, body =~ /\S/ ? body : nil]
     end
 
