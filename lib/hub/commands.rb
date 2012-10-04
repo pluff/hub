@@ -193,55 +193,10 @@ module Hub
       response = api.pull_requests.merge(options[:user], options[:repo], options[:issue],
                                          commit_message: options[:commit_message])
       args.executable = "echo"
-      args.replace ['Merged!']
+      args.replace [response.merged ? 'Merged' : 'Not merged']
     rescue Github::Error::GithubError => e
       puts "Error: #{e.message}"
       exit 1
-    end
-
-    # $ hub merge https://github.com/rtomayko/tilt/issues/92
-    # $ hub merge -i 123
-    def merge(args)
-      args.shift
-      options = { }
-      base_project = local_repo.main_project
-      head_project = local_repo.current_project
-
-      from_github_ref = lambda do |ref, context_project|
-        if ref.index(':')
-          owner, ref = ref.split(':', 2)
-          project = github_project(context_project.name, owner)
-        end
-        [project || context_project, ref]
-      end
-
-      while arg = args.shift
-        case arg
-          when '-i'
-            options[:issue] = args.shift
-          else
-            if url = resolve_github_url(arg) and url.project_path =~ /^pull\/(\d+)/
-              options[:issue] = $1
-              base_project = url.project
-            else
-              abort "invalid argument: #{arg}"
-            end
-        end
-      end
-
-      options[:project]  = base_project
-
-      # when no tracking, assume remote branch is published under active user's fork
-      user = github_user(true, head_project.host)
-
-
-      if (error = merge_pullrequest(options)).empty?
-        echo "PR ##{options[:issue]} was merged successfully"
-      else
-        echo "Merging error: #{error}"
-        echo "PR merge failed"
-      end
-
     end
 
     # $ hub clone rtomayko/tilt
