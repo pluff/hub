@@ -1,6 +1,6 @@
-require '/home/shutin/www/hub/lib/hub/version'
-require '/home/shutin/www/hub/lib/hub/args'
-require '/home/shutin/www/hub/lib/hub/context'
-require '/home/shutin/www/hub/lib/hub/json'
-require '/home/shutin/www/hub/lib/hub/commands'
-require '/home/shutin/www/hub/lib/hub/runner'
+require File.expand_path(File.dirname(__FILE__)+'/hub/version')
+require File.expand_path(File.dirname(__FILE__)+'/hub/args')
+require File.expand_path(File.dirname(__FILE__)+'/hub/context')
+require File.expand_path(File.dirname(__FILE__)+'/hub/json')
+require File.expand_path(File.dirname(__FILE__)+'/hub/commands')
+require File.expand_path(File.dirname(__FILE__)+'/hub/runner')
