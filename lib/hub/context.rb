@@ -240,6 +240,10 @@ module Hub
         end + name_with_owner + '.git'
       end
 
+      def apiv3_url(resource, subject, action)
+        URI("https://#{host}/#{resource}/#{subject}/#{action}")
+      end
+
       def api_url(type, resource, action)
         URI("https://#{host}/api/v2/#{type}/#{resource}/#{action}")
       end
@@ -262,6 +266,10 @@ module Hub
 
       def api_create_pullrequest_url(type)
         api_url(type, 'pulls', "#{owner}/#{name}")
+      end
+
+      def api_merge_pullrequest_url(issue)
+        apiv3_url("repos/#{owner}/#{name}","pulls/#{issue}","merge")
       end
     end
 
@@ -454,7 +462,7 @@ module Hub
     end
 
     # Cross-platform web browser command; respects the value set in $BROWSER.
-    # 
+    #
     # Returns an array, e.g.: ['open']
     def browser_launcher
       browser = ENV['BROWSER'] || (
