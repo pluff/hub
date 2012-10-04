@@ -158,6 +158,51 @@ module Hub
       exit 1
     end
 
+    # $ hub merge https://github.com/rtomayko/tilt/issues/92
+    # $ hub merge -i 123
+    def merge(args)
+      args.shift
+      options = { }
+      base_project = local_repo.main_project
+      head_project = local_repo.current_project
+
+      from_github_ref = lambda do |ref, context_project|
+        if ref.index(':')
+          owner, ref = ref.split(':', 2)
+          project = github_project(context_project.name, owner)
+        end
+        [project || context_project, ref]
+      end
+
+      while arg = args.shift
+        case arg
+          when '-i'
+            options[:issue] = args.shift
+          else
+            if url = resolve_github_url(arg) and url.project_path =~ /^pull\/(\d+)/
+              options[:issue] = $1
+              base_project = url.project
+            else
+              abort "invalid argument: #{arg}"
+            end
+        end
+      end
+
+      options[:project]  = base_project
+
+      # when no tracking, assume remote branch is published under active user's fork
+      user = github_user(true, head_project.host)
+
+
+      if (error = merge_pullrequest(options)).empty?
+        echo "PR ##{options[:issue]} was merged successfully"
+      else
+        echo "Merging error: #{error}"
+        echo "PR merge failed"
+      end
+
+    end
+
     # $ hub clone rtomayko/tilt
     # > git clone git://github.com/rtomayko/tilt.
     #
@@ -895,6 +940,13 @@ help
       JSON.parse(response.body)['pull']
     end
 
+    def merge_pullrequest(options)
+      project = options.fetch(:project)
+      require "pry"
+      binding.pry
+      response = http_post(project.api_merge_pullrequest_url(options[:issue]))
+    end
+
     def pullrequest_editmsg(changes)
       message_file = File.join(git_dir, 'PULLREQ_EDITMSG')
       File.open(message_file, 'w') { |msg|
@@ -924,7 +976,7 @@ help
       title.tr!("\n", ' ')
       title.strip!
       body.strip!
-      
+
       [title =~ /\S/ ? title : nil, body =~ /\S/ ? body : nil]
     end
 
